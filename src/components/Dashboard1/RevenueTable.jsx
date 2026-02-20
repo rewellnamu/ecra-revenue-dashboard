@@ -36,7 +36,7 @@ const RevenueTable = ({ filters = {} }) => {
       }
     };
     loadData();
-  }, [filters.financial_year, filters.sub_county_id, filters.status]);
+  }, [filters]);
 
   const toggleStream = (stream) => setExpandedStreams(p => ({ ...p, [stream]: !p[stream] }));
   const toggleYear = (key) => setExpandedYears(p => ({ ...p, [key]: !p[key] }));

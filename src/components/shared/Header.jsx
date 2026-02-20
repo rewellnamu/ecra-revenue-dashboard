@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 const Header = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header style={{ background: 'var(--green)', color: 'white', boxShadow: '0 2px 12px rgba(0,0,0,0.2)' }}>

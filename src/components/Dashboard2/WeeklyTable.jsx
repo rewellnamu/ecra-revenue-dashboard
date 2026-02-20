@@ -49,7 +49,7 @@ const WeeklyTable = ({ filters = {} }) => {
       }
     };
     loadData();
-  }, [filters.financial_year, filters.sub_county_id]);
+  }, [filters]);
 
   const streams = [...new Set(data.map(r => r.rev_stream))];
 
