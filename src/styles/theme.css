@@ -21,3 +21,58 @@ body {
 
 .font-syne { font-family: 'Syne', sans-serif; }
 .font-mono { font-family: 'DM Mono', monospace; }
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --green: #1a6b3c;
+  --green-light: #2d9e5f;
+  --green-pale: #e8f5ee;
+  --gold: #c8952a;
+  --gold-light: #f5e6c8;
+  --dark: #0f1f17;
+  --gray: #6b7c74;
+  --gray-light: #f0f4f2;
+  --white: #ffffff;
+  --border: #d0ddd6;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #f2f6f3;
+  color: var(--dark);
+}
+
+.font-syne { font-family: 'Syne', sans-serif; }
+.font-mono { font-family: 'DM Mono', monospace; }
+
+/* ===== RESPONSIVE ===== */
+
+/* Desktop — show top nav, hide bottom nav */
+@media (min-width: 768px) {
+  .mobile-nav { display: none !important; }
+  .desktop-nav { display: flex !important; }
+}
+
+/* Mobile — hide top nav, show bottom nav */
+@media (max-width: 767px) {
+  .desktop-nav { display: none !important; }
+  .mobile-nav { display: flex !important; }
+}
+
+/* Responsive padding */
+@media (max-width: 767px) {
+  .dashboard-wrapper {
+    padding: 16px !important;
+  }
+
+  .filter-bar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .filter-divider {
+    display: none !important;
+  }
+}
