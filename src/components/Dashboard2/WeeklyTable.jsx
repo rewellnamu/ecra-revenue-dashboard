@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { mockRevReportsWeekly } from '../../data/mockData';
+import React, { useState, useEffect } from 'react';
+import { fetchWeeklyReports } from '../../services/api';
 import StatusBadge from '../shared/StatusBadge';
 
 const fmt = (amount) => amount ? `KES ${amount.toLocaleString()}` : '—';
@@ -28,52 +28,87 @@ const getLast5Weeks = () => {
 };
 
 const WeeklyTable = ({ filters = {} }) => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [hoveredRow, setHoveredRow] = useState(null);
   const weeks = getLast5Weeks();
 
-  // Apply filters
-  const filteredData = mockRevReportsWeekly.filter(r => {
-    if (filters.financial_year && r.financial_year !== filters.financial_year) return false;
-    if (filters.sub_county_id && filters.sub_county_id !== 'all' && r.sub_county_id !== parseInt(filters.sub_county_id)) return false;
-    return true;
-  });
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetchWeeklyReports(filters);
+        setData(response.data.data);
+      } catch (err) {
+        console.error('Failed to fetch weekly reports:', err);
+        setError('Failed to load data. Please check the backend is running.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [filters.financial_year, filters.sub_county_id]);
 
-  const streams = [...new Set(mockRevReportsWeekly.map(r => r.rev_stream))];
+  const streams = [...new Set(data.map(r => r.rev_stream))];
 
   const getWeekAmount = (stream, weekStart) => {
-    return filteredData
-      .filter(r => r.rev_stream === stream && r.start_date === weekStart)
+    return data
+      .filter(r => r.rev_stream === stream && r.start_date.split('T')[0] === weekStart)
       .reduce((sum, r) => sum + (r.amount || 0), 0);
   };
 
   const getWeekTotal = (weekStart) => {
-    return filteredData
-      .filter(r => r.start_date === weekStart)
+    return data
+      .filter(r => r.start_date.split('T')[0] === weekStart)
       .reduce((sum, r) => sum + (r.amount || 0), 0);
   };
 
   const getWeekStatus = (stream, weekStart) => {
-    const rec = filteredData.find(r => r.rev_stream === stream && r.start_date === weekStart);
+    const rec = data.find(r => r.rev_stream === stream && r.start_date.split('T')[0] === weekStart);
     return rec ? rec.status : null;
   };
 
-  const grandTotal = filteredData.reduce((sum, r) => sum + (r.amount || 0), 0);
+  const grandTotal = data.reduce((sum, r) => sum + (r.amount || 0), 0);
 
+  // Loading state
+  if (loading) {
+    return (
+      <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: '12px', padding: '80px', textAlign: 'center' }}>
+        <div style={{ fontSize: '32px', marginBottom: '16px' }}>⏳</div>
+        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '16px', color: 'var(--green)', marginBottom: '6px' }}>Loading weekly data...</div>
+        <div style={{ fontSize: '13px', color: 'var(--gray)' }}>Fetching from MariaDB</div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div style={{ background: '#fff5f5', border: '1px solid #ffcccc', borderRadius: '12px', padding: '60px', textAlign: 'center' }}>
+        <div style={{ fontSize: '32px', marginBottom: '12px' }}>❌</div>
+        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '16px', color: '#c0392b', marginBottom: '6px' }}>Connection Error</div>
+        <div style={{ fontSize: '13px', color: 'var(--gray)' }}>{error}</div>
+      </div>
+    );
+  }
+
+  // Empty state
   if (streams.length === 0) {
     return (
       <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: '12px', padding: '60px', textAlign: 'center', color: 'var(--gray)' }}>
         <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔍</div>
         <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '16px', marginBottom: '6px' }}>No data found</div>
-        <div style={{ fontSize: '13px' }}>Try adjusting your filters</div>
+        <div style={{ fontSize: '13px' }}>No weekly records found for the selected period</div>
       </div>
     );
   }
 
   return (
     <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-      {/* Table header bar */}
       <div style={{ background: 'var(--dark)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ color: 'white', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', opacity: 0.7 }}>TABLE: rev_reports_weekly</span>
+        <span style={{ color: 'white', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', opacity: 0.7 }}>TABLE: rev_reports_weekly · {data.length} records</span>
         <span style={{ color: 'var(--gold)', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Last 5 calendar weeks · ⭐ = current week</span>
       </div>
 
@@ -85,17 +120,7 @@ const WeeklyTable = ({ filters = {} }) => {
                 Revenue Stream
               </th>
               {weeks.map((w, i) => (
-                <th key={i} style={{
-                  background: w.isCurrent ? 'var(--gold)' : 'var(--green)',
-                  color: 'white',
-                  padding: '12px 16px',
-                  textAlign: 'center',
-                  fontFamily: 'Syne, sans-serif',
-                  fontWeight: 600,
-                  fontSize: '12px',
-                  borderRight: '1px solid rgba(255,255,255,0.1)',
-                  minWidth: '150px',
-                }}>
+                <th key={i} style={{ background: w.isCurrent ? 'var(--gold)' : 'var(--green)', color: 'white', padding: '12px 16px', textAlign: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '12px', borderRight: '1px solid rgba(255,255,255,0.1)', minWidth: '150px' }}>
                   Week {i + 1} {w.isCurrent && '⭐'}
                   <div style={{ fontSize: '10px', fontFamily: 'DM Mono, monospace', opacity: 0.85, fontWeight: 400, marginTop: '3px' }}>{w.label}</div>
                 </th>
@@ -111,83 +136,35 @@ const WeeklyTable = ({ filters = {} }) => {
               const isHovered = hoveredRow === stream;
 
               return (
-                <tr
-                  key={stream}
-                  onMouseEnter={() => setHoveredRow(stream)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                >
-                  <td style={{
-                    padding: '12px 16px',
-                    background: isHovered ? '#d8f0e4' : 'var(--green-pale)',
-                    borderBottom: '1px solid var(--border)',
-                    borderRight: '1px solid var(--border)',
-                    fontFamily: 'Syne, sans-serif',
-                    fontWeight: 700,
-                    fontSize: '12px',
-                    color: 'var(--green)',
-                    transition: 'background 0.15s',
-                  }}>
+                <tr key={stream} onMouseEnter={() => setHoveredRow(stream)} onMouseLeave={() => setHoveredRow(null)}>
+                  <td style={{ padding: '12px 16px', background: isHovered ? '#d8f0e4' : 'var(--green-pale)', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '12px', color: 'var(--green)', transition: 'background 0.15s' }}>
                     {stream}
                   </td>
                   {weeks.map((w, i) => {
                     const amount = getWeekAmount(stream, w.start);
                     const status = getWeekStatus(stream, w.start);
                     return (
-                      <td key={i} style={{
-                        padding: '11px 14px',
-                        textAlign: 'right',
-                        fontFamily: 'DM Mono, monospace',
-                        fontSize: '12px',
-                        borderRight: '1px solid var(--border)',
-                        borderBottom: '1px solid var(--border)',
-                        background: isHovered ? '#f5faf7' : w.isCurrent ? '#fffbf0' : 'white',
-                        color: w.isCurrent ? 'var(--gold)' : 'var(--dark)',
-                        fontWeight: w.isCurrent ? 600 : 400,
-                        transition: 'background 0.15s',
-                      }}>
+                      <td key={i} style={{ padding: '11px 14px', textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '12px', borderRight: '1px solid var(--border)', borderBottom: '1px solid var(--border)', background: isHovered ? '#f5faf7' : w.isCurrent ? '#fffbf0' : 'white', color: w.isCurrent ? 'var(--gold)' : 'var(--dark)', fontWeight: w.isCurrent ? 600 : 400, transition: 'background 0.15s' }}>
                         {amount > 0 ? fmt(amount) : <span style={{ color: '#ccc' }}>—</span>}
                         {status && <StatusBadge status={status} />}
                       </td>
                     );
                   })}
-                  {/* Row total */}
-                  <td style={{
-                    padding: '11px 14px',
-                    textAlign: 'right',
-                    fontFamily: 'DM Mono, monospace',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    background: isHovered ? '#f5faf7' : '#f8faf9',
-                    color: 'var(--green)',
-                    borderBottom: '1px solid var(--border)',
-                    transition: 'background 0.15s',
-                  }}>
+                  <td style={{ padding: '11px 14px', textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: 700, background: isHovered ? '#f5faf7' : '#f8faf9', color: 'var(--green)', borderBottom: '1px solid var(--border)', transition: 'background 0.15s' }}>
                     {streamTotal > 0 ? fmt(streamTotal) : '—'}
                   </td>
                 </tr>
               );
             })}
 
-            {/* Weekly totals row */}
+            {/* Weekly totals */}
             <tr>
-              <td style={{ padding: '12px 16px', background: 'var(--dark)', color: 'var(--gold)', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '12px', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
-                WEEKLY TOTAL
-              </td>
+              <td style={{ padding: '12px 16px', background: 'var(--dark)', color: 'var(--gold)', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '12px', borderRight: '1px solid rgba(255,255,255,0.1)' }}>WEEKLY TOTAL</td>
               {weeks.map((w, i) => (
-                <td key={i} style={{
-                  padding: '12px 14px',
-                  background: 'var(--dark)',
-                  color: w.isCurrent ? '#ffd700' : 'var(--gold)',
-                  textAlign: 'right',
-                  fontFamily: 'DM Mono, monospace',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  borderRight: '1px solid rgba(255,255,255,0.1)',
-                }}>
+                <td key={i} style={{ padding: '12px 14px', background: 'var(--dark)', color: w.isCurrent ? '#ffd700' : 'var(--gold)', textAlign: 'right', fontFamily: 'DM Mono, monospace', fontWeight: 600, fontSize: '13px', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
                   {fmt(getWeekTotal(w.start))}
                 </td>
               ))}
-              {/* Grand total */}
               <td style={{ padding: '12px 14px', background: 'var(--green)', color: 'white', textAlign: 'right', fontFamily: 'DM Mono, monospace', fontWeight: 700, fontSize: '13px' }}>
                 {fmt(grandTotal)}
               </td>
