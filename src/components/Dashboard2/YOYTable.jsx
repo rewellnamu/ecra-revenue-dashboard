@@ -120,52 +120,52 @@ const YOYTable = ({ filters = {} }) => {
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
           <thead>
-            {/* Row 1 — Group headers (ALL COUNTIES, Sub-County 1, etc.) */}
-            <tr>
-              <th style={{ ...thBase, background: 'var(--dark)', width: '150px', textAlign: 'left', position: 'sticky', left: 0, zIndex: 3 }}>
-                Revenue Stream
-              </th>
-              <th style={{ ...thBase, background: 'var(--dark)', width: '120px', textAlign: 'left', position: 'sticky', left: '150px', zIndex: 3 }}>
-                Calendar Month
-              </th>
-              {SUB_COUNTIES.map(sc => (
-                <th
-                  key={sc.id}
-                  colSpan={3}
-                  style={{
-                    ...thBase,
-                    background: sc.id === 'all' ? 'var(--green)' : '#1a4a7a',
-                    borderLeft: '2px solid rgba(255,255,255,0.2)',
-                    fontSize: '12px',
-                    padding: '12px 16px',
-                  }}
-                >
-                  {sc.label}
-                </th>
-              ))}
-            </tr>
+  {/* Row 1 — Fixed columns + Group headers */}
+  <tr>
+    <th style={{ ...thBase, background: 'var(--dark)', width: '150px', textAlign: 'left', position: 'sticky', left: 0, zIndex: 3 }}>
+      Revenue Stream
+    </th>
+    <th style={{ ...thBase, background: 'var(--dark)', width: '120px', textAlign: 'left', position: 'sticky', left: '150px', zIndex: 3 }}>
+      Calendar Month
+    </th>
+    {SUB_COUNTIES.map(sc => (
+      <th
+        key={sc.id}
+        colSpan={YEARS.length}
+        style={{
+          ...thBase,
+          background: sc.id === 'all' ? 'var(--green)' : '#1a4a7a',
+          borderLeft: '3px solid rgba(255,255,255,0.3)',
+          fontSize: '12px',
+          padding: '12px 16px',
+        }}
+      >
+        {sc.label}
+      </th>
+    ))}
+  </tr>
 
-            {/* Row 2 — Year headers under each group */}
-            <tr>
-              <th style={{ ...thBase, background: '#0a1710', position: 'sticky', left: 0, zIndex: 3, textAlign: 'left' }}></th>
-              <th style={{ ...thBase, background: '#0a1710', position: 'sticky', left: '150px', zIndex: 3, textAlign: 'left' }}></th>
-              {SUB_COUNTIES.map(sc =>
-                YEARS.map((year, i) => (
-                  <th
-                    key={`${sc.id}-${year}`}
-                    style={{
-                      ...thBase,
-                      background: year === 2026 ? '#2d6b47' : year === 2025 ? '#1a5c38' : '#0f4028',
-                      borderLeft: i === 0 ? '2px solid rgba(255,255,255,0.2)' : 'none',
-                      fontSize: '11px',
-                    }}
-                  >
-                    {year}
-                  </th>
-                ))
-              )}
-            </tr>
-          </thead>
+  {/* Row 2 — Year columns under each group */}
+  <tr>
+    <th style={{ ...thBase, background: '#0a1710', position: 'sticky', left: 0, zIndex: 3, textAlign: 'left' }}></th>
+    <th style={{ ...thBase, background: '#0a1710', position: 'sticky', left: '150px', zIndex: 3, textAlign: 'left' }}></th>
+    {SUB_COUNTIES.map(sc =>
+      YEARS.map((year, i) => (
+        <th
+          key={`${sc.id}-${year}`}
+          style={{
+            ...thBase,
+            background: year === 2026 ? '#2d6b47' : '#1a5c38',
+            borderLeft: i === 0 ? '3px solid rgba(255,255,255,0.3)' : 'none',
+            fontSize: '11px',
+          }}
+        >
+          {year}
+        </th>
+      ))
+    )}
+  </tr>
+</thead>
 
           <tbody>
             {streams.map(stream => {
