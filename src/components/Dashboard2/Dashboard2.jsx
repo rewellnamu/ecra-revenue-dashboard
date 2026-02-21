@@ -1,15 +1,10 @@
 import React, { useState } from 'react';
-import WeeklyTable from './WeeklyTable';
+import YOYTable from './YOYTable';
 
 const Dashboard2 = () => {
   const [filters, setFilters] = useState({
     financial_year: 'FY2025/2026',
-    sub_county_id: 'all',
   });
-
-  const handleFilter = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  };
 
   const selectStyle = {
     background: '#f0f4f2',
@@ -33,17 +28,9 @@ const Dashboard2 = () => {
     whiteSpace: 'nowrap',
   };
 
-  const today = new Date();
-  const dayOfWeek = today.getDay();
-  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  const currentMonday = new Date(today);
-  currentMonday.setDate(today.getDate() + mondayOffset);
-  const currentSunday = new Date(currentMonday);
-  currentSunday.setDate(currentMonday.getDate() + 6);
-  const weekLabel = `${currentMonday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} – ${currentSunday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
-
   return (
     <div className="dashboard-wrapper" style={{ padding: '24px 40px' }}>
+
       {/* Title */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
         <span style={{ background: 'var(--gold)', color: 'white', fontFamily: 'DM Mono, monospace', fontSize: '10px', padding: '3px 10px', borderRadius: '4px', letterSpacing: '1px' }}>
@@ -51,58 +38,55 @@ const Dashboard2 = () => {
         </span>
       </div>
       <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: 800, marginBottom: '4px' }}>
-        Weekly Revenue Progress
+        Year-on-Year Revenue Comparison
       </div>
-      <div style={{ fontSize: '13px', color: 'var(--gray)', marginBottom: '20px' }}>
-        Last 5 calendar weeks · Source: <code>rev_reports_weekly</code>
-      </div>
-
-      {/* Current week banner */}
-      <div style={{ background: '#fffbf0', border: '1.5px solid var(--gold)', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-        <span style={{ fontSize: '18px', flexShrink: 0 }}>📅</span>
-        <div>
-          <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '13px', color: 'var(--gold)' }}>Current Week (open): </span>
-          <span style={{ fontSize: '13px', color: 'var(--dark)' }}>{weekLabel}</span>
-          <div style={{ marginTop: '3px', fontSize: '11px', color: 'var(--gray)' }}>Data is still being collected for this week</div>
-        </div>
+      <div style={{ fontSize: '13px', color: 'var(--gray)', marginBottom: '16px' }}>
+        Compare revenue streams across years · Source: <code>rev_reports</code>
       </div>
 
       {/* Filter Bar */}
-      <div className="filter-bar" style={{ background: 'white', border: '1px solid var(--border)', borderRadius: '10px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
+      <div className="filter-bar" style={{ background: 'white', border: '1px solid var(--border)', borderRadius: '10px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
         <span style={labelStyle}>Filters</span>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: '140px' }}>
           <span style={labelStyle}>Year</span>
-          <select style={selectStyle} value={filters.financial_year} onChange={e => handleFilter('financial_year', e.target.value)}>
-            <option value="FY2025/2026">FY2025/2026</option>
-            <option value="FY2024/2025">FY2024/2025</option>
-          </select>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: '140px' }}>
-          <span style={labelStyle}>Sub-County</span>
-          <select style={selectStyle} value={filters.sub_county_id} onChange={e => handleFilter('sub_county_id', e.target.value)}>
-            <option value="all">All Counties</option>
-            <option value="1">Embu</option>
-            <option value="2">Runyenjes</option>
-            <option value="3">Manyatta</option>
-            <option value="4">Mbere North</option>
-            <option value="5">Mbere South</option>
-            <option value="6">Siakago</option>
-          </select>
-        </div>
-
-        {filters.sub_county_id !== 'all' && (
-          <button
-            onClick={() => setFilters({ financial_year: 'FY2025/2026', sub_county_id: 'all' })}
-            style={{ background: '#fff0f0', border: '1px solid #ffcccc', color: '#c0392b', borderRadius: '6px', padding: '6px 12px', fontSize: '12px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap' }}
+          <select
+            style={selectStyle}
+            value={filters.financial_year}
+            onChange={e => setFilters({ financial_year: e.target.value })}
           >
-            ✕ Clear
-          </button>
-        )}
+            <option value="FY2025/2026">FY2025/2026</option>
+          </select>
+        </div>
       </div>
 
-      <WeeklyTable filters={filters} />
+      {/* Legend */}
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+        {[2025, 2026].map(year => (
+          <div key={year} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--gray)' }}>
+            <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: year === 2026 ? 'var(--green)' : '#1a5c38' }}></div>
+            {year} {year === 2026 ? '(current)' : ''}
+          </div>
+        ))}
+
+        {/* Scroll hint — visible on mobile only */}
+        <div style={{ marginLeft: 'auto', background: 'var(--gold-light)', border: '1px solid var(--gold)', borderRadius: '6px', padding: '4px 10px', fontSize: '11px', color: 'var(--gold)', fontFamily: 'DM Mono, monospace', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span>👆</span>
+          <span>Scroll table horizontally to see all sub-counties</span>
+        </div>
+      </div>
+
+      {/* Info banner */}
+      <div style={{ background: 'var(--green-pale)', border: '1px solid #c8dfd2', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+        <span style={{ fontSize: '16px', flexShrink: 0 }}>💡</span>
+        <div style={{ fontSize: '12px', color: 'var(--gray)', lineHeight: '1.6' }}>
+          <strong style={{ color: 'var(--green)' }}>How to use: </strong>
+          Click any revenue stream row to expand and see month-by-month breakdown.
+          Each group of columns shows the same stream across different years for easy comparison.
+        </div>
+      </div>
+
+      {/* YOY Table */}
+      <YOYTable filters={filters} />
     </div>
   );
 };

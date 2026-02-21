@@ -43,7 +43,7 @@ const App = () => {
               whiteSpace: 'nowrap',
             })}
           >
-            📅 Weekly Progress
+            📅 YOY
           </NavLink>
         </div>
 
@@ -105,7 +105,7 @@ const App = () => {
             })}
           >
             <span style={{ fontSize: '20px' }}>📅</span>
-            Weekly
+            YOY
           </NavLink>
         </div>
       </div>
