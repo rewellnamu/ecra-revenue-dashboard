@@ -30,7 +30,7 @@ const RevenueTable = ({ filters = {} }) => {
         setData(response.data.data);
       } catch (err) {
         console.error('Failed to fetch revenue reports:', err);
-        setError('Failed to load data. Please check the backend is running.');
+        setError('Failed to load data. contact customer service.');
       } finally {
         setLoading(false);
       }
