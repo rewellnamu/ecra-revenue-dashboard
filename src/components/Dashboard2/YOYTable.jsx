@@ -7,8 +7,8 @@ const SUB_COUNTIES = [
   { id: 1, label: 'Embu' },
   { id: 2, label: 'Runyenjes' },
   { id: 3, label: 'Manyatta' },
-  { id: 4, label: 'Mbere North' },
-  { id: 5, label: 'Mbere South' },
+  { id: 4, label: 'Mbeere North' },
+  { id: 5, label: 'Mbeere South' },
   { id: 6, label: 'Siakago' },
 ];
 
