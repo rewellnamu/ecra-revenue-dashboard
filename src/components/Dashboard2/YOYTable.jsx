@@ -4,12 +4,12 @@ import { fetchRevenueReports } from '../../services/api';
 const YEARS = [2025, 2026];
 const SUB_COUNTIES = [
   { id: 'all', label: 'ALL COUNTIES' },
-  { id: 1, label: 'Embu' },
-  { id: 2, label: 'Runyenjes' },
-  { id: 3, label: 'Manyatta' },
+  { id: 1, label: 'Embu West' },
+  { id: 2, label: 'Embu North' },
+  { id: 3, label: 'Runyenjes' },
   { id: 4, label: 'Mbeere North' },
   { id: 5, label: 'Mbeere South' },
-  { id: 6, label: 'Siakago' },
+  { id: 6, label: 'Mwea' },
 ];
 
 const MONTHS = [

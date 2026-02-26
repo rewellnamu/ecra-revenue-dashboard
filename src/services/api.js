@@ -25,4 +25,9 @@ export const fetchWeeklyTotals = (filters = {}) => {
   return api.get('/dashboard2/totals', { params: filters });
 };
 
+// Dashboard 3 — Revenue Targets
+export const fetchRevenueTargets = (filters = {}) => {
+  return api.get('/dashboard3/targets', { params: filters });
+};
+
 export default api;
