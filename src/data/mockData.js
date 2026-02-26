@@ -95,10 +95,10 @@ export const mockRevReportsWeekly = [
 
 // Sub-county name mapping
 export const subCountyNames = {
-  1: 'Embu',
-  2: 'Runyenjes',
-  3: 'Manyatta',
-  4: 'Mbere North',
-  5: 'Mbere South',
-  6: 'Siakago',
+  1: 'Embu West',
+  2: 'Embu North',
+  3: 'Runyenjes',
+  4: 'Mbeere North',
+  5: 'Mbeere South',
+  6: 'Mwea',
 };
