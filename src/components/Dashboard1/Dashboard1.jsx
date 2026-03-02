@@ -65,12 +65,12 @@ const Dashboard1 = () => {
           <span style={labelStyle}>Sub-County</span>
           <select style={selectStyle} value={filters.sub_county_id} onChange={e => handleFilter('sub_county_id', e.target.value)}>
             <option value="all">All Counties</option>
-            <option value="1">Embu</option>
-            <option value="2">Runyenjes</option>
-            <option value="3">Manyatta</option>
-            <option value="4">Mbere North</option>
-            <option value="5">Mbere South</option>
-            <option value="6">Siakago</option>
+            <option value="1">Embu West</option>
+            <option value="2">Embu North</option>
+            <option value="3">Runyenjes</option>
+            <option value="4">Mbeere North</option>
+            <option value="5">Mbeere South</option>
+            <option value="6">Mwea</option>
           </select>
         </div>
 
