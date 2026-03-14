@@ -4,3 +4,7 @@ dist
 .gitignore
 Dockerfile
 README.md
+.env
+.env.local
+.env.development
+.env.production
