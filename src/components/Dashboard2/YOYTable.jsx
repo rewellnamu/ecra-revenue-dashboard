@@ -27,38 +27,38 @@ const YOYTable = ({ filters = {} }) => {
   const [expandedStreams, setExpandedStreams] = useState({});
 
   useEffect(() => {
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await fetchRevenueReports({});
-      setData(response.data.data);
-    } catch (err) {
-      console.error('Failed to fetch YOY data:', err);
-      setError('Failed to load data. Please check the backend is running.');
-    } finally {
-      setLoading(false);
-    }
-  };
-  loadData();
-}, [filters]);
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetchRevenueReports({});
+        setData(response.data.data);
+      } catch (err) {
+        console.error('Failed to fetch YOY data:', err);
+        setError('Failed to load data. Please check the backend is running.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [filters]);
 
   const toggleStream = (stream) =>
     setExpandedStreams(p => ({ ...p, [stream]: !p[stream] }));
 
   const streams = [...new Set(data.map(r => r.rev_stream))];
 
- const getAmount = (stream, month, year, subCountyId) => {
-  return data
-    .filter(r => {
-      if (r.rev_stream !== stream) return false;
-      if (Number(r.calendar_year) !== Number(year)) return false;
-      if (month !== 'ALL' && r.calendar_month !== month) return false;
-      if (subCountyId !== 'all' && Number(r.sub_county_id) !== Number(subCountyId)) return false;
-      return true;
-    })
-    .reduce((sum, r) => sum + (r.amount || 0), 0);
-};
+  const getAmount = (stream, month, year, subCountyId) => {
+    return data
+      .filter(r => {
+        if (r.rev_stream !== stream) return false;
+        if (Number(r.calendar_year) !== Number(year)) return false;
+        if (month !== 'ALL' && r.calendar_month !== month) return false;
+        if (subCountyId !== 'all' && Number(r.sub_county_id) !== Number(subCountyId)) return false;
+        return true;
+      })
+      .reduce((sum, r) => sum + (r.amount || 0), 0);
+  };
 
   // Loading
   if (loading) {
@@ -120,52 +120,52 @@ const YOYTable = ({ filters = {} }) => {
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
           <thead>
-  {/* Row 1 — Fixed columns + Group headers */}
-  <tr>
-    <th style={{ ...thBase, background: 'var(--dark)', width: '150px', textAlign: 'left', position: 'sticky', left: 0, zIndex: 3 }}>
-      Revenue Stream
-    </th>
-    <th style={{ ...thBase, background: 'var(--dark)', width: '120px', textAlign: 'left', position: 'sticky', left: '150px', zIndex: 3 }}>
-      Calendar Month
-    </th>
-    {SUB_COUNTIES.map(sc => (
-      <th
-        key={sc.id}
-        colSpan={YEARS.length}
-        style={{
-          ...thBase,
-          background: sc.id === 'all' ? 'var(--green)' : '#1a4a7a',
-          borderLeft: '3px solid rgba(255,255,255,0.3)',
-          fontSize: '12px',
-          padding: '12px 16px',
-        }}
-      >
-        {sc.label}
-      </th>
-    ))}
-  </tr>
+            {/* Row 1 — Fixed columns + Group headers */}
+            <tr>
+              <th style={{ ...thBase, background: 'var(--dark)', width: '150px', textAlign: 'left' }}>
+                Revenue Stream
+              </th>
+              <th style={{ ...thBase, background: 'var(--dark)', width: '120px', textAlign: 'left' }}>
+                Calendar Month
+              </th>
+              {SUB_COUNTIES.map(sc => (
+                <th
+                  key={sc.id}
+                  colSpan={YEARS.length}
+                  style={{
+                    ...thBase,
+                    background: sc.id === 'all' ? 'var(--green)' : '#1a4a7a',
+                    borderLeft: '3px solid rgba(255,255,255,0.3)',
+                    fontSize: '12px',
+                    padding: '12px 16px',
+                  }}
+                >
+                  {sc.label}
+                </th>
+              ))}
+            </tr>
 
-  {/* Row 2 — Year columns under each group */}
-  <tr>
-    <th style={{ ...thBase, background: '#0a1710', position: 'sticky', left: 0, zIndex: 3, textAlign: 'left' }}></th>
-    <th style={{ ...thBase, background: '#0a1710', position: 'sticky', left: '150px', zIndex: 3, textAlign: 'left' }}></th>
-    {SUB_COUNTIES.map(sc =>
-      YEARS.map((year, i) => (
-        <th
-          key={`${sc.id}-${year}`}
-          style={{
-            ...thBase,
-            background: year === 2026 ? '#2d6b47' : '#1a5c38',
-            borderLeft: i === 0 ? '3px solid rgba(255,255,255,0.3)' : 'none',
-            fontSize: '11px',
-          }}
-        >
-          {year}
-        </th>
-      ))
-    )}
-  </tr>
-</thead>
+            {/* Row 2 — Year columns under each group */}
+            <tr>
+              <th style={{ ...thBase, background: '#0a1710', textAlign: 'left' }}></th>
+              <th style={{ ...thBase, background: '#0a1710', textAlign: 'left' }}></th>
+              {SUB_COUNTIES.map(sc =>
+                YEARS.map((year, i) => (
+                  <th
+                    key={`${sc.id}-${year}`}
+                    style={{
+                      ...thBase,
+                      background: year === 2026 ? '#2d6b47' : '#1a5c38',
+                      borderLeft: i === 0 ? '3px solid rgba(255,255,255,0.3)' : 'none',
+                      fontSize: '11px',
+                    }}
+                  >
+                    {year}
+                  </th>
+                ))
+              )}
+            </tr>
+          </thead>
 
           <tbody>
             {streams.map(stream => {
@@ -188,9 +188,6 @@ const YOYTable = ({ filters = {} }) => {
                     fontWeight: 700,
                     fontSize: '12px',
                     color: 'var(--green)',
-                    position: 'sticky',
-                    left: 0,
-                    zIndex: 1,
                     whiteSpace: 'nowrap',
                   }}>
                     <span style={{ marginRight: '8px', background: isExpanded ? 'var(--gold)' : 'var(--green)', color: 'white', borderRadius: '4px', padding: '1px 6px', fontSize: '10px' }}>
@@ -209,9 +206,6 @@ const YOYTable = ({ filters = {} }) => {
                     fontWeight: 600,
                     fontSize: '11px',
                     color: 'var(--green)',
-                    position: 'sticky',
-                    left: '150px',
-                    zIndex: 1,
                     whiteSpace: 'nowrap',
                   }}>
                     ALL MONTHS
@@ -255,9 +249,6 @@ const YOYTable = ({ filters = {} }) => {
                       background: 'white',
                       borderBottom: '1px solid #f0f4f2',
                       borderRight: '1px solid var(--border)',
-                      position: 'sticky',
-                      left: 0,
-                      zIndex: 1,
                     }}></td>
 
                     {/* Month label */}
@@ -268,9 +259,6 @@ const YOYTable = ({ filters = {} }) => {
                       borderRight: '2px solid var(--border)',
                       color: 'var(--gray)',
                       fontSize: '12px',
-                      position: 'sticky',
-                      left: '150px',
-                      zIndex: 1,
                       whiteSpace: 'nowrap',
                     }}>
                       {month}
@@ -311,9 +299,6 @@ const YOYTable = ({ filters = {} }) => {
                 fontFamily: 'Syne, sans-serif',
                 fontWeight: 700,
                 fontSize: '12px',
-                position: 'sticky',
-                left: 0,
-                zIndex: 1,
               }}>
                 GRAND TOTAL
               </td>

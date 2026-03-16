@@ -149,9 +149,6 @@ const TargetsTable = ({ filters = {} }) => {
                 background: 'var(--dark)',
                 width: '180px',
                 textAlign: 'left',
-                position: 'sticky',
-                left: 0,
-                zIndex: 3,
               }}>
                 Revenue Stream
               </th>
@@ -195,9 +192,6 @@ const TargetsTable = ({ filters = {} }) => {
                     fontWeight: 700,
                     fontSize: '12px',
                     color: 'var(--green)',
-                    position: 'sticky',
-                    left: 0,
-                    zIndex: 1,
                     whiteSpace: 'nowrap',
                   }}>
                     {stream}
@@ -241,9 +235,6 @@ const TargetsTable = ({ filters = {} }) => {
                 fontFamily: 'Syne, sans-serif',
                 fontWeight: 700,
                 fontSize: '12px',
-                position: 'sticky',
-                left: 0,
-                zIndex: 1,
               }}>
                 GRAND TOTAL
               </td>
