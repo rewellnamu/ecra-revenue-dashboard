@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchRevenueReports } from '../../services/api';
-import { subCountyNames } from '../../data/mockData';
 import StatusBadge from '../shared/StatusBadge';
 
-const SUB_COUNTIES = [1, 2, 3, 4, 5, 6];
 const fmt = (amount) => amount ? `KES ${amount.toLocaleString()}` : '—';
 
 const getAmount = (records, filters) => {
@@ -12,7 +10,9 @@ const getAmount = (records, filters) => {
     .reduce((sum, r) => sum + (r.amount || 0), 0);
 };
 
-const RevenueTable = ({ filters = {} }) => {
+const RevenueTable = ({ filters = {}, subCounties = [] }) => {
+  const SUB_COUNTIES = subCounties.map(sc => sc.id);
+
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,7 +30,7 @@ const RevenueTable = ({ filters = {} }) => {
         setData(response.data.data);
       } catch (err) {
         console.error('Failed to fetch revenue reports:', err);
-        setError('Failed to load data. contact customer service.');
+        setError('Failed to load data. Contact customer service.');
       } finally {
         setLoading(false);
       }
@@ -64,6 +64,9 @@ const RevenueTable = ({ filters = {} }) => {
     return rec ? rec.status : 'closed';
   };
 
+  const getSubCountyName = (id) =>
+    subCounties.find(s => s.id === id)?.name || `Sub-County ${id}`;
+
   const thStyle = {
     background: 'var(--green)', color: 'white', padding: '12px 16px',
     textAlign: 'left', fontFamily: 'Syne, sans-serif', fontWeight: 600,
@@ -72,18 +75,16 @@ const RevenueTable = ({ filters = {} }) => {
   const thNumStyle = { ...thStyle, textAlign: 'right' };
   const rowHover = (id) => ({ onMouseEnter: () => setHoveredRow(id), onMouseLeave: () => setHoveredRow(null) });
 
-  // Loading state
   if (loading) {
     return (
       <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: '12px', padding: '80px', textAlign: 'center' }}>
-        <div style={{ fontSize: '32px', marginBottom: '16px', animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</div>
+        <div style={{ fontSize: '32px', marginBottom: '16px', display: 'inline-block' }}>⏳</div>
         <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '16px', color: 'var(--green)', marginBottom: '6px' }}>Loading revenue data...</div>
         <div style={{ fontSize: '13px', color: 'var(--gray)' }}>Fetching from MariaDB</div>
       </div>
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div style={{ background: '#fff5f5', border: '1px solid #ffcccc', borderRadius: '12px', padding: '60px', textAlign: 'center' }}>
@@ -94,7 +95,6 @@ const RevenueTable = ({ filters = {} }) => {
     );
   }
 
-  // Empty state
   if (streams.length === 0) {
     return (
       <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: '12px', padding: '60px', textAlign: 'center', color: 'var(--gray)' }}>
@@ -120,7 +120,9 @@ const RevenueTable = ({ filters = {} }) => {
               <th style={thStyle}>Financial Year</th>
               <th style={thStyle}>Year / Month</th>
               <th style={thNumStyle}>All Counties</th>
-              {SUB_COUNTIES.map(sc => <th key={sc} style={thNumStyle}>{subCountyNames[sc]}</th>)}
+              {SUB_COUNTIES.map(sc => (
+                <th key={sc} style={thNumStyle}>{getSubCountyName(sc)}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -225,7 +227,6 @@ const RevenueTable = ({ filters = {} }) => {
               );
             })}
 
-            {/* Grand Total */}
             <tr style={{ position: 'sticky', bottom: 0, zIndex: 2 }}>
               <td colSpan={3} style={{ padding: '13px 16px', background: 'var(--dark)', color: 'white', fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
                 GRAND TOTAL — {filters.financial_year}

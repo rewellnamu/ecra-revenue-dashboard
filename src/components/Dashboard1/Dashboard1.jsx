@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import RevenueTable from './RevenueTable';
+import useSubCounties from '../../hooks/useSubCounties';
 
 const Dashboard1 = () => {
   const [filters, setFilters] = useState({
@@ -7,6 +8,8 @@ const Dashboard1 = () => {
     sub_county_id: 'all',
     status: 'all',
   });
+
+  const { subCounties } = useSubCounties();
 
   const handleFilter = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -36,7 +39,6 @@ const Dashboard1 = () => {
 
   return (
     <div className="dashboard-wrapper" style={{ padding: '24px 40px' }}>
-      {/* Title */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
         <span style={{ background: 'var(--green)', color: 'white', fontFamily: 'DM Mono, monospace', fontSize: '10px', padding: '3px 10px', borderRadius: '4px', letterSpacing: '1px' }}>
           DASHBOARD 1
@@ -49,7 +51,6 @@ const Dashboard1 = () => {
         Tap row to expand · Source: <code>rev_reports</code>
       </div>
 
-      {/* Filter Bar */}
       <div className="filter-bar" style={{ background: 'white', border: '1px solid var(--border)', borderRadius: '10px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
         <span style={labelStyle}>Filters</span>
 
@@ -65,12 +66,9 @@ const Dashboard1 = () => {
           <span style={labelStyle}>Sub-County</span>
           <select style={selectStyle} value={filters.sub_county_id} onChange={e => handleFilter('sub_county_id', e.target.value)}>
             <option value="all">All Counties</option>
-            <option value="1">Embu West</option>
-            <option value="2">Embu North</option>
-            <option value="3">Runyenjes</option>
-            <option value="4">Mbeere North</option>
-            <option value="5">Mbeere South</option>
-            <option value="6">Mwea</option>
+            {subCounties.map(sc => (
+              <option key={sc.id} value={sc.id}>{sc.name}</option>
+            ))}
           </select>
         </div>
 
@@ -93,8 +91,7 @@ const Dashboard1 = () => {
         )}
       </div>
 
-      {/* Table */}
-      <RevenueTable filters={filters} />
+      <RevenueTable filters={filters} subCounties={subCounties} />
     </div>
   );
 };
