@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import TargetsTable from '../components/Dashboard3/TargetsTable';
+import useSubCounties from '../hooks/useSubCounties';
 
 const Dashboard3Page = () => {
   const [filters, setFilters] = useState({
     financial_year: 'FY2025/2026',
   });
+
+  const { subCounties } = useSubCounties();
 
   const selectStyle = {
     background: '#f0f4f2',
@@ -77,10 +80,10 @@ const Dashboard3Page = () => {
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Summary Cards — dynamic from subCounties */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
         {[
-          { label: 'Sub-Counties', value: '6', icon: '🗺️' },
+          { label: 'Sub-Counties', value: subCounties.length || '—', icon: '🗺️' },
           { label: 'Revenue Streams', value: '12', icon: '📊' },
           { label: 'Financial Year', value: filters.financial_year, icon: '📅' },
         ].map(card => (
@@ -146,8 +149,8 @@ const Dashboard3Page = () => {
         </div>
       </div>
 
-      {/* Targets Table */}
-      <TargetsTable filters={filters} />
+      {/* Targets Table — now receives subCounties from backend */}
+      <TargetsTable filters={filters} subCounties={subCounties} />
     </div>
   );
 };

@@ -1,23 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { fetchRevenueTargets } from '../../services/api';
 
-const SUB_COUNTIES = [
-  { id: 1, label: 'Embu West' },
-  { id: 2, label: 'Embu North' },
-  { id: 3, label: 'Runyenjes' },
-  { id: 4, label: 'Mbeere North' },
-  { id: 5, label: 'Mbeere South' },
-  { id: 6, label: 'Mwea' },
-];
-
 const fmt = (amount) =>
   amount > 0 ? `KES ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—';
 
-const TargetsTable = ({ filters = {} }) => {
+const TargetsTable = ({ filters = {}, subCounties = [] }) => {
+  const SUB_COUNTIES = subCounties.map(sc => ({ id: sc.id, label: sc.name }));
+
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState('annual'); // 'annual' | 'monthly'
+  const [viewMode, setViewMode] = useState('annual');
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,10 +53,8 @@ const TargetsTable = ({ filters = {} }) => {
     );
   }
 
-  // Derive unique revenue streams from data
   const streams = [...new Set(data.map(r => r.rev_stream))].sort();
 
-  // Lookup: get target for a given stream + sub_county_id
   const getTarget = (stream, subCountyId, field) => {
     const row = data.find(
       r => r.rev_stream === stream && Number(r.sub_county_id) === Number(subCountyId)
@@ -71,15 +62,12 @@ const TargetsTable = ({ filters = {} }) => {
     return row ? (row[field] || 0) : 0;
   };
 
-  // Row total across all sub-counties
   const getRowTotal = (stream, field) =>
     SUB_COUNTIES.reduce((sum, sc) => sum + getTarget(stream, sc.id, field), 0);
 
-  // Column total for a sub-county
   const getColTotal = (subCountyId, field) =>
     streams.reduce((sum, stream) => sum + getTarget(stream, subCountyId, field), 0);
 
-  // Grand total
   const grandTotal = (field) =>
     streams.reduce((sum, stream) => sum + getRowTotal(stream, field), 0);
 
@@ -121,6 +109,16 @@ const TargetsTable = ({ filters = {} }) => {
     transition: 'all 0.15s',
   });
 
+  // Show loading skeleton if subCounties not loaded yet
+  if (SUB_COUNTIES.length === 0) {
+    return (
+      <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: '12px', padding: '60px', textAlign: 'center', color: 'var(--gray)' }}>
+        <div style={{ fontSize: '32px', marginBottom: '12px' }}>⏳</div>
+        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '16px', marginBottom: '6px' }}>Loading sub-county data...</div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
       {/* Header bar */}
@@ -128,7 +126,6 @@ const TargetsTable = ({ filters = {} }) => {
         <span style={{ color: 'white', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', opacity: 0.7 }}>
           TABLE: rev_targets · Revenue Targets by Sub-County
         </span>
-        {/* Toggle: Annual / Monthly */}
         <div style={{ display: 'flex', gap: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '7px', padding: '4px' }}>
           <button style={toggleBtnStyle(viewMode === 'annual')} onClick={() => setViewMode('annual')}>
             ANNUAL
@@ -143,16 +140,9 @@ const TargetsTable = ({ filters = {} }) => {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
           <thead>
             <tr>
-              {/* Revenue stream col */}
-              <th style={{
-                ...thBase,
-                background: 'var(--dark)',
-                width: '180px',
-                textAlign: 'left',
-              }}>
+              <th style={{ ...thBase, background: 'var(--dark)', width: '180px', textAlign: 'left' }}>
                 Revenue Stream
               </th>
-              {/* Sub-county columns */}
               {SUB_COUNTIES.map(sc => (
                 <th key={sc.id} style={{
                   ...thBase,
@@ -163,7 +153,6 @@ const TargetsTable = ({ filters = {} }) => {
                   {sc.label}
                 </th>
               ))}
-              {/* Row total */}
               <th style={{
                 ...thBase,
                 background: 'var(--green)',
@@ -182,7 +171,6 @@ const TargetsTable = ({ filters = {} }) => {
 
               return (
                 <tr key={stream}>
-                  {/* Stream name */}
                   <td style={{
                     padding: '11px 14px',
                     background: isEven ? 'var(--green-pale)' : 'white',
@@ -196,8 +184,6 @@ const TargetsTable = ({ filters = {} }) => {
                   }}>
                     {stream}
                   </td>
-
-                  {/* Sub-county cells */}
                   {SUB_COUNTIES.map((sc) => {
                     const val = getTarget(stream, sc.id, targetField);
                     return (
@@ -211,8 +197,6 @@ const TargetsTable = ({ filters = {} }) => {
                       </td>
                     );
                   })}
-
-                  {/* Row total */}
                   <td style={{
                     ...cellBase,
                     background: isEven ? '#eef6f1' : '#f5faf7',
@@ -226,7 +210,7 @@ const TargetsTable = ({ filters = {} }) => {
               );
             })}
 
-            {/* Column totals row */}
+            {/* Column totals */}
             <tr>
               <td style={{
                 padding: '12px 14px',
@@ -265,13 +249,11 @@ const TargetsTable = ({ filters = {} }) => {
         </table>
       </div>
 
-      {/* Footer note */}
       <div style={{ padding: '10px 20px', background: '#f9fafb', borderTop: '1px solid var(--border)', fontSize: '11px', color: 'var(--gray)', fontFamily: 'DM Mono, monospace', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
         <span>📅 Financial Year: {filters.financial_year || 'FY2025/2026'}</span>
         <span>·</span>
         <span>
-          Showing {viewMode === 'annual' ? 'annual' : 'monthly'} targets ·{' '}
-          {streams.length} revenue stream{streams.length !== 1 ? 's' : ''}
+          Showing {viewMode === 'annual' ? 'annual' : 'monthly'} targets · {streams.length} revenue stream{streams.length !== 1 ? 's' : ''}
         </span>
       </div>
     </div>
